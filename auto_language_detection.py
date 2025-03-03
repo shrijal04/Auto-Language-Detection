@@ -12,6 +12,27 @@ FORMAT = pyaudio.paInt16  # 16-bit audio format
 CHUNK_SIZE = 1024  # Number of frames per buffer
 RECORD_DURATION = 5  # Duration in seconds
 
+# Language code to full name mapping
+LANGUAGE_MAP = {
+    "en": "English",
+    "es": "Spanish",
+    "fr": "French",
+    "de": "German",
+    "it": "Italian",
+    "zh": "Chinese",
+    "ja": "Japanese",
+    "ko": "Korean",
+    "ru": "Russian",
+    "hi": "Hindi",
+    "ne": "Nepali",
+    "ar": "Arabic",
+    "pt": "Portuguese",
+    "bn": "Bengali",
+    "ur": "Urdu",
+    "tr": "Turkish",
+    "vi": "Vietnamese"
+}
+
 # Function to record audio for a specific duration
 def record_audio(duration=RECORD_DURATION, file_path="recorded_audio.wav"):
     p = pyaudio.PyAudio()
@@ -48,10 +69,12 @@ def detect_language(file_path, model_size="medium", device="cpu", compute_type="
 
     # Perform language detection
     _, info = model.transcribe(file_path, beam_size=5, language=None)
+    detected_lang_code = info.language
+    detected_lang_name = LANGUAGE_MAP.get(detected_lang_code, "Unknown Language")
 
     # Print detected language
-    print(f"Detected language: '{info.language}' with probability {info.language_probability:.6f}")
-    return info.language
+    print(f"Detected language: '{detected_lang_name}' ({detected_lang_code}) with probability {info.language_probability:.6f}")
+    return detected_lang_name
 
 # Function to record and detect language
 def main():
