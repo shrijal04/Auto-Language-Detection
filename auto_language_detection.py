@@ -1,5 +1,3 @@
-# pip install faster_whisper
-
 import pyaudio
 import numpy as np
 import wave
@@ -62,28 +60,33 @@ def record_audio(duration=RECORD_DURATION, file_path="recorded_audio.wav"):
     print(f"Recording saved to {file_path}")
     return file_path
 
-# Function to detect language without full transcription
-def detect_language(file_path, model_size="medium", device="cpu", compute_type="int8"):
+# Function to detect language and transcribe audio
+def detect_language_and_transcribe(file_path, model_size="medium", device="cpu", compute_type="int8"):
     # Initialize the WhisperModel
     model = WhisperModel(model_size, device=device, compute_type=compute_type)
 
-    # Perform language detection
-    _, info = model.transcribe(file_path, beam_size=5, language=None)
+    # Perform transcription
+    segments, info = model.transcribe(file_path, beam_size=5, language=None)  # Auto language detection
+    transcribed_text = " ".join([segment.text for segment in segments if hasattr(segment, 'text')])
+
+    # Detect language
     detected_lang_code = info.language
     detected_lang_name = LANGUAGE_MAP.get(detected_lang_code, "Unknown Language")
 
-    # Print detected language
+    # Print detected language and transcription
     print(f"Detected language: '{detected_lang_name}' ({detected_lang_code}) with probability {info.language_probability:.6f}")
-    return detected_lang_name
+    print(f"Transcribed Text: {transcribed_text}")
+    return detected_lang_name, transcribed_text
 
-# Function to record and detect language
+# Function to record and detect language with transcription
 def main():
     # Record audio
     audio_file = record_audio(duration=5, file_path="recorded_audio.wav")
 
-    # Detect language
-    detected_language = detect_language(audio_file)
+    # Detect language and transcribe
+    detected_language, transcribed_text = detect_language_and_transcribe(audio_file)
     print(f"Detected Language: {detected_language}")
+    print(f"Transcribed Text: {transcribed_text}")
 
 if __name__ == "__main__":
     main()
